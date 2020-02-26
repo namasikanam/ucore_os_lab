@@ -290,17 +290,26 @@ read_eip(void) {
  * */
 void
 print_stackframe(void) {
-     /* LAB1 YOUR CODE : STEP 1 */
-     /* (1) call read_ebp() to get the value of ebp. the type is (uint32_t);
-      * (2) call read_eip() to get the value of eip. the type is (uint32_t);
-      * (3) from 0 .. STACKFRAME_DEPTH
-      *    (3.1) printf value of ebp, eip
-      *    (3.2) (uint32_t)calling arguments [0..4] = the contents in address (uint32_t)ebp +2 [0..4]
-      *    (3.3) cprintf("\n");
-      *    (3.4) call print_debuginfo(eip-1) to print the C calling function name and line number, etc.
-      *    (3.5) popup a calling stackframe
-      *           NOTICE: the calling funciton's return addr eip  = ss:[ebp+4]
-      *                   the calling funciton's ebp = ss:[ebp]
-      */
+    /* LAB1 2017011326 : STEP 1 */
+    // (1) call read_ebp() to get the value of ebp. the type is (uint32_t);
+    uintptr_t ebp = (uintptr_t)read_ebp();
+    // (2) call read_eip() to get the value of eip. the type is (uint32_t);
+    uintptr_t eip = (uintptr_t)read_eip();
+    // (3) from 0 .. STACKFRAME_DEPTH
+    for (int i = 0; ebp && i < STACKFRAME_DEPTH; ++i) {
+        // (3.1) printf value of ebp, eip
+        cprintf("ebp:%010p eip:%010p", ebp, eip);
+        // (3.2) (uint32_t)calling arguments [0..4] = the contents in address (uint32_t)ebp +2 [0..4]
+        cprintf(" args:");
+        for (int j = 0; j < 4; ++j)
+            cprintf("0x%08x%c", *((uint32_t *)ebp + 2 + j), " \n"[j == 3]);
+        // (3.3) call print_debuginfo(eip-1) to print the C calling function name and line number, etc.
+        print_debuginfo(eip - 1);
+        // (3.4) popup a calling stackframe
+        // NOTICE: the calling funciton's return addr eip  = ss:[ebp+4]
+        eip = (uintptr_t)*((uint32_t *)ebp + 1);
+        // the calling funciton's ebp = ss:[ebp]
+        ebp = (uintptr_t)*(uint32_t *)ebp;
+    }
 }
 
