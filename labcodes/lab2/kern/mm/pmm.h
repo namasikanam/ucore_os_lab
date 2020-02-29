@@ -11,7 +11,7 @@
 // only needs to implement the methods in pmm_manager class, then XXX_pmm_manager can be used
 // by ucore to manage the total physical memory space.
 struct pmm_manager {
-    const char *name;                                 // XXX_pmm_manager's name
+    const char *name;                                 // Some pmm_manager's name
     void (*init)(void);                               // initialize internal description&management data structure
                                                       // (free block list, number of free block) of XXX_pmm_manager 
     void (*init_memmap)(struct Page *base, size_t n); // setup description&management data structcure according to
