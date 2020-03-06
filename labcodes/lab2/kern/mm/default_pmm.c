@@ -151,8 +151,6 @@ default_init_memmap(struct Page *base, size_t n) {
 // `malloc`.
 static struct Page *
 default_alloc_pages(size_t n) {
-    // cprintf("Alloc %d page\n", n);
-
     assert(n > 0);
     if (n > nr_free) {
         return NULL;
@@ -191,15 +189,6 @@ default_alloc_pages(size_t n) {
         page->property = 0;
         ClearPageProperty(page);
     }
-
-    // if (page != NULL) {
-    //     cprintf("Get %d pages: ", n);
-    //     for (int i = 0; i < n; ++i) {
-    //         cprintf("%p%c", page + i, " \n"[i == n - 1]);
-    //     }
-    // }
-    // print_free_list();
-
     return page;
 }
 
@@ -207,8 +196,6 @@ default_alloc_pages(size_t n) {
 // the big ones.
 static void
 default_free_pages(struct Page *base, size_t n) {
-    // cprintf("Free %d page beginning at %p\n", n, base);
-
     assert(n > 0);
     // Reset the fields of the pages, such as `p->ref` and `p->flags` (PageProperty)
     struct Page *p = base;
@@ -232,8 +219,6 @@ default_free_pages(struct Page *base, size_t n) {
             list_add(current_le, &(base->page_link));
 
             if (current_le != &free_list) {
-                // cprintf("current_p + current_p->property = %p v.s. base = %p\n", current_p + current_p->property, base);
-
                 if (current_p + current_p->property == base) {
                     current_p->property += base->property;
 
@@ -244,8 +229,6 @@ default_free_pages(struct Page *base, size_t n) {
                 }
             }
             if (next_le != &free_list) {
-                // cprintf("base + base->property = %p v.s. next_p = %p\n", base + base->property, next_p);
-
                 if (base + base->property == next_p) {
                     base->property += next_p->property;
 
@@ -260,8 +243,6 @@ default_free_pages(struct Page *base, size_t n) {
         next_le = list_next(next_le);
     } while (current_le != &free_list);
     nr_free += n;
-
-    // print_free_list();
 }
 
 static size_t
