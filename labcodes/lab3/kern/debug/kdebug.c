@@ -293,7 +293,7 @@ read_eip(void) {
  * */
 void
 print_stackframe(void) {
-     /* LAB1 YOUR CODE : STEP 1 */
+     /* LAB1 2017011326 : STEP 1 */
      // (1) call read_ebp() to get the value of ebp. the type is (uint32_t);
     uintptr_t ebp = (uintptr_t)read_ebp();
     // (2) call read_eip() to get the value of eip. the type is (uint32_t);
