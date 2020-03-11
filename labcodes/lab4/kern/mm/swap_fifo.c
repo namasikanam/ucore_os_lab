@@ -51,7 +51,6 @@ _fifo_map_swappable(struct mm_struct *mm, uintptr_t addr, struct Page *page, int
     //record the page access situlation
     /*LAB3 EXERCISE 2: 2017011326*/ 
     //(1)link the most recent arrival page at the back of the pra_list_head qeueue.
-    
     list_add_before(head, entry);
 
     return 0;
