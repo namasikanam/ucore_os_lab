@@ -22,7 +22,7 @@
  * and allocation from the heap is currently first-fit.
  *
  * Above this is an implementation of kmalloc/kfree. Blocks returned
- * from kmalloc are 8-byte aligned and prepended with a 8-byte header.
+ * from kmalloc are 8-byte aligned and prepended with an 8-byte header.
  * If kmalloc is asked for objects of PAGE_SIZE or larger, it calls
  * __get_free_pages directly so that it can return page-aligned blocks
  * and keeps a linked list of such pages and their orders. These

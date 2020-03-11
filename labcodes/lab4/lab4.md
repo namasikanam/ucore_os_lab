@@ -2,7 +2,14 @@
 
 ## 练习1
 
+帮助注释和文档对于应当如何初始化并没有说得十分清晰，我不得不参考标准代码来实现。
 
+不过，我认为标准代码有一点疏忽：`proc->name`是一个`char[PROC_NAME_LEN + 1]`，标准代码应当对整个`char[]`清零，然而其只对前`PROC_NAME_LEN`清零了。
+
+Q: 请说明`proc_struct`中`struct context context`和`struct trapframe *tf`成员变量含义和在本实验中的作用是啥？（提示通过看代码和编程调试可以判断出来）
+
+- `struct context context`：进程的上下文，即进程切换过程（`kern/process/switch.S`中的`switch_to`）中应当保存的寄存器。
+- `struct trapframe *tf`：中断帧的指针，总是指向内核栈的某个位置：当进程从用户空间跳到内核空间时，中断帧记录了进程在被中断前的状态。当内核需要跳回用户空间时，需要调整中断帧以恢复让进程继续执行的各寄存器值。
 
 ## 练习2
 
