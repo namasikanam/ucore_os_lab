@@ -115,12 +115,16 @@ alloc_proc(void) {
         proc->cr3 = boot_cr3;
         proc->flags = 0;
         memset(proc->name, 0, sizeof(char) * (PROC_NAME_LEN + 1));
-        //LAB5 YOUR CODE : (update LAB4 steps)
+        //LAB5 2017011326 : (update LAB4 steps)
         /*
         * below fields(add in LAB5) in proc_struct need to be initialized	
         *       uint32_t wait_state;                        // waiting state
         *       struct proc_struct *cptr, *yptr, *optr;     // relations between processes
         */
+        proc->wait_state = 0;
+        proc->cptr = NULL;
+        proc->yptr = NULL;
+        proc->optr = NULL;
     }
     return proc;
 }
@@ -399,6 +403,10 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
      *   proc_list:    the process set's list
      *   nr_process:   the number of process set
      */
+    //LAB5 2017011326 : (update LAB4 steps)
+    /* Some Functions
+    *    set_links:  set the relation links of process.  ALSO SEE: remove_links:  lean the relation links of process 
+    */
 
     //    1. call alloc_proc to allocate a proc_struct
     proc = alloc_proc();
@@ -406,6 +414,12 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
         cprintf("alloc_proc in do_fork failed\n");
         goto fork_out;
     }
+    //    update step 1: set child proc's parent to current process, make sure current process's wait_state is 0
+    if (current->wait_state != 0) {
+        cprintf("wait_state isn't 0\n");
+        goto fork_out;
+    }
+    proc->parent = current;
     //    2. call setup_kstack to allocate a kernel stack for child process
     if (setup_kstack(proc) != 0) {
         cprintf("setup_kstack in do_fork failed\n");
@@ -425,22 +439,14 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
     {
         proc->pid = get_pid();
         hash_proc(proc);
-        list_add(&proc_list, &(proc->list_link));
-        ++nr_process;
+        //    update step 5: insert proc_struct into hash_list && proc_list, set the relation links of process
+        set_links(proc);
     }
     local_intr_restore(intr_flag);
     //    6. call wakeup_proc to make the new child process RUNNABLE
     wakeup_proc(proc);
     //    7. set ret vaule using child proc's pid
     ret = proc->pid;
-
-	//LAB5 YOUR CODE : (update LAB4 steps)
-    /* Some Functions
-    *    set_links:  set the relation links of process.  ALSO SEE: remove_links:  lean the relation links of process 
-    *    -------------------
-    *    update step 1: set child proc's parent to current process, make sure current process's wait_state is 0
-    *    update step 5: insert proc_struct into hash_list && proc_list, set the relation links of process
-    */
 	
 fork_out:
     return ret;
@@ -631,15 +637,20 @@ load_icode(unsigned char *binary, size_t size) {
     //(6) setup trapframe for user environment
     struct trapframe *tf = current->tf;
     memset(tf, 0, sizeof(struct trapframe));
-    /* LAB5:EXERCISE1 YOUR CODE
+    /* LAB5:EXERCISE1 2017011326
      * should set tf_cs,tf_ds,tf_es,tf_ss,tf_esp,tf_eip,tf_eflags
      * NOTICE: If we set trapframe correctly, then the user level process can return to USER MODE from kernel. So
-     *          tf_cs should be USER_CS segment (see memlayout.h)
-     *          tf_ds=tf_es=tf_ss should be USER_DS segment
-     *          tf_esp should be the top addr of user stack (USTACKTOP)
-     *          tf_eip should be the entry point of this binary program (elf->e_entry)
-     *          tf_eflags should be set to enable computer to produce Interrupt
      */
+    //          tf_cs should be USER_CS segment (see memlayout.h)
+    tf->tf_cs = USER_CS;
+    //          tf_ds=tf_es=tf_ss should be USER_DS segment
+    tf->tf_ds = tf->tf_es = tf->tf_ss = USER_DS;
+    //          tf_esp should be the top addr of user stack (USTACKTOP)
+    tf->tf_esp = USTACKTOP;
+    //          tf_eip should be the entry point of this binary program (elf->e_entry)
+    tf->tf_eip = elf->e_entry;
+    //          tf_eflags should be set to enable computer to produce Interrupt
+    tf->tf_eflags = FL_IF;
     ret = 0;
 out:
     return ret;
