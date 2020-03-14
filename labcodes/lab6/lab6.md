@@ -32,17 +32,28 @@ Q: 请在实验报告中简要说明如何设计实现“多级反馈队列调�
 
 ## 练习2
 
-首先阅读了论文 Stride Scheduling: Deterministic Proportional-Share Resource Management 和文档。
+首先阅读了论文 Stride Scheduling: Deterministic Proportional-Share Resource Management 和文档，实现了一个基于链表的 Stride Scheduling 算法。
 
-完成实验后，请分析 ucore_lab 中提供的参考答案，并请在实验报告中说明你的实现与参考答案的区别
+文档中的一些小坑：
+- 文档和 ucore 的框架代码搞反了原始论文中 stride 和 pass 的含义。
+- 文档和注释中遗漏了一些细节：
+    - `priority`可能为0；
+    - 入队时进程的`time_slice`如何处理。
 
----
-
-竟然`priority`还有可能为0……
-
-感觉对于入队时进程的`time_slice`该怎么处理，文档里并没有写得很细致诶……还是得看参考代码……
+代码中的一些小坑：
+- 参考代码的`make grade`并不能跑到满分，而是需要删去两行`assert`。这点在piazza的[这个帖子](https://piazza.com/class/i5j09fnsl7k5x0?cid=821)和[这个帖子](https://piazza.com/class/i5j09fnsl7k5x0?cid=801)中有提及，在`lab6`中这两行`assert`已被删去，但是在`lab6_result`中并未将其删去。
+- `make grade`的结果不稳定，尤其是最后`matrix`和`priority`两个点，有时会报错。
 
 ## 总结
 
-列出你认为本实验中重要的知识点，以及与对应的 OS 原理中的知识点，并简要说明你对二者的含义，关系，差异等方面的理解（也可能出现实验中的知识点没有对应的原理知识点）
-列出你认为 OS 原理中很重要，但在实验中没有对应上的知识点
+### 本实验涉及的知识点
+
+- 进程调度的流程
+- 进程调度算法
+    - Round Robin
+    - Multilevel Feedback Queue
+    - Stride Scheduling
+
+### 本实验应涉及但未涉及的知识点
+
+- 调度准则
