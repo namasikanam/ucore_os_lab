@@ -2,11 +2,37 @@
 
 ## 练习1
 
-完成练习 0 后，建议大家比较一下（可用 meld 等文件 diff 比较软件）个人完成的 lab6 和练习 0 完成后的刚修改的 lab7 之间的区别，分析了解 lab7 采用信号量的执行过程。
+Q：请在实验报告中给出内核级信号量的设计描述，并说明其大致执行流程。
 
-请在实验报告中给出内核级信号量的设计描述，并说明其大致执行流程。
+参考教科书*Operating Systems Internals and Design Principles*第五章《同步互斥》中对信号量实现的原理性描述：
+```c++
+struct semaphore {
+    int count;
+    queueType queue;
+};
+void semWait(semaphore s)
+{
+    s.count--;
+    if (s.count < 0) {
+        /* place this process in s.queue */;
+        /* block this process */;
+    }
+}
+void semSignal(semaphore s)
+{
+    s.count++;
+    if (s.count<= 0) {
+        /* remove a process P from s.queue */;
+        /* place process P on ready list */;
+    }
+}
+```
 
-请在实验报告中给出给用户态进程/线程提供信号量机制的设计方案，并比较说明给内核级提供信号量机制的异同。
+当多个（>1）进程可以进行互斥或同步合作时，一个进程会由于无法满足信号量设置的某条件而在某一位置停止，直到它接收到一个特定的信号（表明条件满足了）。为了发信号，需要使用一个称作信号量的特殊变量。为通过信号量`s`传送信号，信号量的 V 操作采用进程可执行原语`semSignal(s)`；为通过信号量`s`接收信号，信号量的 P 操作采用进程可执行原语`semWait(s)`；如果相应的信号仍然没有发送，则进程被阻塞或睡眠，直到发送完为止。
+
+Q：请在实验报告中给出给用户态进程/线程提供信号量机制的设计方案，并比较说明给内核级提供信号量机制的异同。
+
+用户态进程/线程可采用于内核态基本相同的设计方案，不同之处在于需要给信号量添加一个权限标识，并将P/V操作封装成系统调用。
 
 ## 练习2
 
