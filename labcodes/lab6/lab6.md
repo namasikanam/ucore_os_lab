@@ -32,7 +32,15 @@ Q: 请在实验报告中简要说明如何设计实现“多级反馈队列调�
 
 ## 练习2
 
+首先阅读了论文 Stride Scheduling: Deterministic Proportional-Share Resource Management 和文档。
+
 完成实验后，请分析 ucore_lab 中提供的参考答案，并请在实验报告中说明你的实现与参考答案的区别
+
+---
+
+竟然`priority`还有可能为0……
+
+感觉对于入队时进程的`time_slice`该怎么处理，文档里并没有写得很细致诶……还是得看参考代码……
 
 ## 总结
 

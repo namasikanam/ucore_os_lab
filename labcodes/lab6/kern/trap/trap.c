@@ -237,22 +237,17 @@ trap_dispatch(struct trapframe *tf) {
         // (1) After a timer interrupt, you should record this event using a global variable (increase it), such as ticks in kern/driver/clock.c
         ++ticks;
         // (2) Every TICK_NUM cycle, you can print some info using a funciton, such as print_ticks().
-        if (ticks % TICK_NUM == 0) {
-            // print_ticks();
-        }
         // (3) Too Simple? Yes, I think so!
         /* LAB5 2017011326 */
         /* you should upate you lab1 code (just add ONE or TWO lines of code):
         *    Every TICK_NUM cycle, you should set current process's current->need_resched = 1
         */
-        if (ticks % TICK_NUM == 0) {
-            current->need_resched = 1;
-        }
         /* LAB6 2017011326 */
         /* you should upate you lab5 code
          * IMPORTANT FUNCTIONS:
 	     * sched_class_proc_tick
          */
+        assert(current != NULL);
         sched_class_proc_tick(current);
         break;
     case IRQ_OFFSET + IRQ_COM1:
