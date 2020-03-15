@@ -650,7 +650,7 @@ load_icode(int fd, int argc, char **kargv) {
     //(3) copy TEXT/DATA section, build BSS parts in binary to memory space of process
     struct Page *page;
     //(3.1) read raw data content in file and resolve elfhdr
-    struct elfhdr *elf;
+    struct elfhdr __elf, *elf = &__elf;
     if ((ret = load_icode_read(fd, elf, sizeof(struct elfhdr), 0)) != 0) {
         cprintf("load_icode_read for elfhdr in load_icode failed\n");
         goto bad_elf_cleanup_pgdir;
@@ -662,7 +662,7 @@ load_icode(int fd, int argc, char **kargv) {
         goto bad_elf_cleanup_pgdir;
     }
     //(3.3) read raw data content in file and resolve proghdr based on info in elfhdr
-    struct proghdr *ph;
+    struct proghdr __ph, *ph = &__ph;
     uint32_t vm_flags, perm;
     for (uint32_t phnum = 0; phnum < elf->e_phnum; phnum ++) {
     //(3.4) find every program section headers
@@ -695,15 +695,12 @@ load_icode(int fd, int argc, char **kargv) {
         size_t off, size;
         uintptr_t start = ph->p_va, end, la = ROUNDDOWN(start, PGSIZE);
 
-        ret = -E_NO_MEM;
-
      //(3.6) alloc memory, and  copy the contents of every program section (from, from+end) to process's memory (la, la+end)
         end = ph->p_va + ph->p_filesz;
      //(3.6.1) copy TEXT/DATA section of bianry program
         while (start < end) {
             if ((page = pgdir_alloc_page(mm->pgdir, la, perm)) == NULL) {
                 cprintf("pgdir_alloc_page for sections of %uth program header in load_icode failed\n", phnum);
-                ret = -E_NO_MEM;
                 goto bad_cleanup_mmap;
             }
             off = start - la, size = PGSIZE - off, la += PGSIZE;
@@ -735,7 +732,6 @@ load_icode(int fd, int argc, char **kargv) {
         while (start < end) {
             if ((page = pgdir_alloc_page(mm->pgdir, la, perm)) == NULL) {
                 cprintf("pgdir_alloc_page for BSS section of %uth program header in load_icode failed\n", phnum);
-                ret = -E_NO_MEM;
                 goto bad_cleanup_mmap;
             }
             off = start - la, size = PGSIZE - off, la += PGSIZE;
@@ -766,6 +762,7 @@ load_icode(int fd, int argc, char **kargv) {
     lcr3(PADDR(mm->pgdir));
 
     //(6) setup uargc and uargv in user stacks
+
     uint32_t argv_size = 0;
     for (uint32_t i = 0; i < argc; ++i) {
         argv_size += strnlen(kargv[i], EXEC_MAX_ARG_LEN + 1) + 1;
@@ -791,6 +788,7 @@ load_icode(int fd, int argc, char **kargv) {
     tf->tf_esp = stacktop;
     tf->tf_eip = elf->e_entry;
     tf->tf_eflags = FL_IF;
+
     ret = 0;
 out:
     return ret;
